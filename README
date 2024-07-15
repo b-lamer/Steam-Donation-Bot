@@ -1,4 +1,4 @@
-Prerequisites:
+Prerequisites (Work in progress):
 - You will need to install node.js and npm
 - steam-user (npm i steam-user)
 - steam-totp (npm i steam-totp)
