@@ -1,3 +1,4 @@
+//Dependencies that are needed, User and Totp for logging in, community and tradeoffermanager for trade processing.
 const SteamUser = require('steam-user');
 const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
@@ -12,6 +13,7 @@ const manager = new TradeOfferManager({
   language: 'en'
 });
 
+//Logs in, needs all fields filled in the config file to log in properly.
 const logOnOptions = {
   accountName: config.username,
   password: config.password,
@@ -20,6 +22,7 @@ const logOnOptions = {
 
 client.logOn(logOnOptions);
 
+//Notifies client when user is logged in, will automatically be playing csgo (ID: 730) to show it's active.
 client.on('loggedOn', () => {
   console.log('Logged into Steam');
 
@@ -27,6 +30,7 @@ client.on('loggedOn', () => {
   client.gamesPlayed(730);
 });
 
+//Passes cookies into trade manager, will not detect trades properly if API key isn't set in config file
 client.on('webSession', (sessionid, cookies) => {
   manager.setCookies(cookies, err => {
     if (err) {
@@ -38,6 +42,8 @@ client.on('webSession', (sessionid, cookies) => {
     console.log('Trade Offer Manager initialized successfully.');
   });
 });
+
+//This next area is for accepting trades only if they're from a specific steam user, commented out for now
 
 /*
 manager.on('newOffer', offer => {
@@ -64,6 +70,7 @@ manager.on('newOffer', offer => {
 });
 */
 
+//Once a trade is detected, checks that length of the items given array is 0, and if it is then it accepts the trade, otherwise rejects
 manager.on('newOffer', offer => {
   if (offer.itemsToGive.length === 0) {
     console.log('Items received: ' + offer.itemsToReceive.length);
