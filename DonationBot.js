@@ -30,7 +30,7 @@ client.on('loggedOn', () => {
   client.gamesPlayed(730);
 });
 
-//Passes cookies into trade manager, will not detect trades properly if API key isn't set in config file
+//Passes cookies into trade manager, will not detect trades properly if API key isn't set in config file.
 client.on('webSession', (sessionid, cookies) => {
   manager.setCookies(cookies, err => {
     if (err) {
@@ -43,7 +43,7 @@ client.on('webSession', (sessionid, cookies) => {
   });
 });
 
-//This next area is for accepting trades only if they're from a specific steam user, commented out for now
+//This next area is for accepting trades only if they're from a specific steam user, commented out for now.
 
 /*
 manager.on('newOffer', offer => {
@@ -70,7 +70,7 @@ manager.on('newOffer', offer => {
 });
 */
 
-//Once a trade is detected, checks that length of the items given array is 0, and if it is then it accepts the trade, otherwise rejects
+//Once a trade is detected, checks that length of the items given array is 0, and if it is then it accepts the trade, otherwise rejects.
 manager.on('newOffer', offer => {
   if (offer.itemsToGive.length === 0) {
     console.log('Items received: ' + offer.itemsToReceive.length);
