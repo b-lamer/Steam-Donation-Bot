@@ -43,14 +43,13 @@ client.on('webSession', (sessionid, cookies) => {
   });
 });
 
-//This next area is for accepting trades only if they're from a specific steam user, commented out for now.
-
-/*
+//Once a trade is detected, checks that length of the items given array is 0, and if it is then it accepts the trade, otherwise rejects.
 manager.on('newOffer', offer => {
-  console.log('Trade offer detected...');
+  console.log('New trade offer detected...');
+  //This if statement checks whether the Steam64 ID is equal to your set 'trusted account' and will auto accept any trade from the 
+  //account you specify
   if (offer.partner.getSteamID64() === 'Insert Steam ID 64 Here') {
     console.log('Trade offer from trusted account detected...');
-
     offer.accept((err, status) => {
       if (err) {
         console.log(err);
@@ -58,22 +57,9 @@ manager.on('newOffer', offer => {
         console.log(`Accepted offer. Status: ${status}.`);
       }
     });
-  } else {
-    offer.decline(err => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('Cancelled offer from scammer.');
-      }
-    });
   }
-});
-*/
-
-//Once a trade is detected, checks that length of the items given array is 0, and if it is then it accepts the trade, otherwise rejects.
-manager.on('newOffer', offer => {
+  //This other if statement is the one that is described above
   if (offer.itemsToGive.length === 0) {
-    console.log('Items received: ' + offer.itemsToReceive.length);
     offer.accept((err, status) => {
       if (err) {
         console.log(err);
@@ -82,7 +68,6 @@ manager.on('newOffer', offer => {
       }
     });
   } else {
-    console.log('Items given: ' + offer.itemsToGive.length);
     offer.decline(err => {
       if (err) {
         console.log(err);
