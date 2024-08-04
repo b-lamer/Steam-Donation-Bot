@@ -46,12 +46,12 @@ manager.on('newOffer', offer => {
   console.log('New offer received.');
 
   if (offer.partner.getSteamID64() === 'Insert Steam 64 ID Here') {
-    console.log('Trade offer from trusted account detected...');
-    handleOffer(offer);
+    console.log('Trade offer from trusted account detected.');
+    getPlayerName(offer);
 
   } else if (offer.itemsToGive.length === 0) {
     console.log('Items received: ' + offer.itemsToReceive.length);
-    handleOffer(offer);
+    getPlayerName(offer);
 
   } else {
     console.log('Items given: ' + offer.itemsToGive.length);
@@ -65,8 +65,7 @@ manager.on('newOffer', offer => {
   }
 });
 
-
-function handleOffer(offer) {
+function handleOffer(offer, playerName) {
   offer.accept((err, status) => {
     if (err) {
       console.log('Error accepting offer:', err);
@@ -81,14 +80,12 @@ function handleOffer(offer) {
             console.log('Error confirming trade offer:', err);
           } else {
             console.log('Trade offer confirmed successfully.');
-            const playerName = "Player"; 
             updateLeaderboard(offer.partner.getSteamID64(), playerName, offer.itemsToReceive.length);
           }
         });
 
       } else {
         console.log('No confirmation needed for this trade offer.');
-        const playerName = "Player";
         updateLeaderboard(offer.partner.getSteamID64(), playerName, offer.itemsToReceive.length);
       }
     }
@@ -134,4 +131,18 @@ function updateLeaderboard(steamID, playerName, itemsReceived){
     leaderboardData.push([steamID, playerName, itemsReceived]);
   }
   writeLeaderboard(leaderboardData);
+}
+
+function getPlayerName(offer) {
+  const steamID = offer.partner.getSteamID64();
+  community.getSteamUser(offer.partner, (err, user) => {
+    if (err) {
+      console.log('Error getting player profile: ', err);
+      return;
+    }
+    const playerName = user.name || 'Unknown';
+    console.log(`Player Name: ${playerName}`);
+
+    handleOffer(offer, playerName);
+  });
 }
