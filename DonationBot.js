@@ -65,6 +65,7 @@ manager.on('newOffer', offer => {
   }
 });
 
+
 function handleOffer(offer) {
   offer.accept((err, status) => {
     if (err) {
@@ -110,7 +111,9 @@ function readLeaderboard(){
 
 function writeLeaderboard(data){
   try {
-    fs.writeFileSync(leaderboardPath, JSON.stringify(data, null, 2), 'utf8');
+    const formattedData = data.map(entry => JSON.stringify(entry)).join(',\n ');
+    const output = `[\n ${formattedData}\n]`;
+    fs.writeFileSync(leaderboardPath, output, 'utf8');
     console.log('Leaderboard file updated successfully.');
   } catch (err) {
     console.log('Error writing to leaderboar file: ', err);
