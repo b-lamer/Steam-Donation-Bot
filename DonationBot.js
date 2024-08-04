@@ -3,6 +3,10 @@ const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 const config = require('./config.json');
+const fs = require('fs');
+const path = require('path');
+
+const leaderboardPath = path.join(__dirname, 'leaderboard.json');
 
 const client = new SteamUser();
 const community = new SteamCommunity();
@@ -39,14 +43,16 @@ client.on('webSession', (sessionid, cookies) => {
 });
 
 manager.on('newOffer', offer => {
-  console.log('New offer received from:', offer.partner.getSteamID64());
+  console.log('New offer received.');
 
-  if (offer.partner.getSteamID64() === 'Insert Steam64 ID here') {
+  if (offer.partner.getSteamID64() === 'Insert Steam 64 ID Here') {
     console.log('Trade offer from trusted account detected...');
     handleOffer(offer);
+
   } else if (offer.itemsToGive.length === 0) {
     console.log('Items received: ' + offer.itemsToReceive.length);
     handleOffer(offer);
+
   } else {
     console.log('Items given: ' + offer.itemsToGive.length);
     offer.decline(err => {
@@ -65,14 +71,64 @@ function handleOffer(offer) {
       console.log('Error accepting offer:', err);
     } else {
       console.log(`Accepted offer. Status: ${status}.`);
-      // Sends 2FA confirmation
-      community.acceptConfirmationForObject(config.identitySecret, offer.id, (err) => {
-        if (err) {
-          console.log('Error confirming trade offer:', err);
-        } else {
-          console.log('Trade offer confirmed successfully.');
-        }
-      });
+
+      // Check if confirmation is needed
+      if (status === 'pending') {
+        // Send 2FA confirmation
+        community.acceptConfirmationForObject(config.identitySecret, offer.id, (err) => {
+          if (err) {
+            console.log('Error confirming trade offer:', err);
+          } else {
+            console.log('Trade offer confirmed successfully.');
+            const playerName = "Player"; 
+            updateLeaderboard(offer.partner.getSteamID64(), playerName, offer.itemsToReceive.length);
+          }
+        });
+
+      } else {
+        console.log('No confirmation needed for this trade offer.');
+        const playerName = "Player";
+        updateLeaderboard(offer.partner.getSteamID64(), playerName, offer.itemsToReceive.length);
+      }
     }
   });
+}
+
+function readLeaderboard(){
+  try {
+    if (fs.existsSync(leaderboardPath,)){
+      const data = fs.readFileSync(leaderboardPath, 'utf8');
+      return JSON.parse(data);
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log('Error reading leaderboard file: ', err);
+    return []
+  }
+}
+
+function writeLeaderboard(data){
+  try {
+    fs.writeFileSync(leaderboardPath, JSON.stringify(data, null, 2), 'utf8');
+    console.log('Leaderboard file updated successfully.');
+  } catch (err) {
+    console.log('Error writing to leaderboar file: ', err);
+  }
+}
+
+function updateLeaderboard(steamID, playerName, itemsReceived){
+  const leaderboardData = readLeaderboard();
+  let playerFound = false;
+  for (let i = 0; i < leaderboardData.length; i++) {
+    if (leaderboardData[i][0] === steamID) {
+      leaderboardData[i][2] += itemsReceived;
+      playerFound = true;
+      break;
+    }
+  }
+  if(!playerFound) {
+    leaderboardData.push([steamID, playerName, itemsReceived]);
+  }
+  writeLeaderboard(leaderboardData);
 }
