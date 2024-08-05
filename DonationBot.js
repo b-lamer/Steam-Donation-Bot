@@ -113,7 +113,7 @@ function writeLeaderboard(data){
     fs.writeFileSync(leaderboardPath, output, 'utf8');
     console.log('Leaderboard file updated successfully.');
   } catch (err) {
-    console.log('Error writing to leaderboar file: ', err);
+    console.log('Error writing to leaderboard file: ', err);
   }
 }
 
