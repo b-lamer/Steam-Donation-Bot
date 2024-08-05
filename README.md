@@ -10,3 +10,7 @@
 2. (NOT REQUIRED) In addition to this, edit the DonationBot.js file, on line 51 there is a section where you need to add a trusted accounts Steam64 ID so that the bot will autoaccept trades that are received from that account. If you do not fill this out then it will still work, you just won't have an administrator account to remotely control the bot. 
 3. As long as the packages above are installed, you can run the bot by opening cmd, navigating to the correct directory, and using "node DonationBot.js"
 4. It will display the login process in your console. If you get any errors it should print them so that they can be fixed.
+
+### Donation Tracking Info:
+Once the bot is running and someone donates an item, the program will create a "leaderboard.json" file that will keep track of the SteamID64, name, and total items donated by that user.
+The username does not update with each donation, and the file is just sorted by oldest -> newest donators.
