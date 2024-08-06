@@ -3,8 +3,8 @@ const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 const config = require('./config.json');
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs'); // Allows the program to interact with other files (for 'leaderboard' file)
+const path = require('path'); // Handles file paths (for 'leaderboard' file)
 
 const leaderboardPath = path.join(__dirname, 'leaderboard.json');
 
@@ -16,6 +16,7 @@ const manager = new TradeOfferManager({
   language: 'en'
 });
 
+// Logs into account using username, password, and sharedsecret (to generate 2fa code) saved in config file
 const logOnOptions = {
   accountName: config.username,
   password: config.password,
@@ -30,6 +31,7 @@ client.on('loggedOn', () => {
   client.gamesPlayed(730);
 });
 
+// Takes cookies? and like eats them or something? Idk maybe it's just hungry
 client.on('webSession', (sessionid, cookies) => {
   manager.setCookies(cookies, err => {
     if (err) {
@@ -42,6 +44,9 @@ client.on('webSession', (sessionid, cookies) => {
   });
 });
 
+/* Runs when a new offer is received, checks ID to see if it's from trusted account
+if not, checks if items being given away is equal to 0, if not then rejects offer.
+If not rejected, runs getPlayerName function (defined below) */
 manager.on('newOffer', offer => {
   console.log('New offer received.');
 
@@ -65,6 +70,7 @@ manager.on('newOffer', offer => {
   }
 });
 
+// Handles accepting of offers and sending the 2fa confirmation to Steam
 function handleOffer(offer, playerName) {
   offer.accept((err, status) => {
     if (err) {
@@ -92,6 +98,7 @@ function handleOffer(offer, playerName) {
   });
 }
 
+// Basically just gets info from leaderboard
 function readLeaderboard(){
   try {
     if (fs.existsSync(leaderboardPath,)){
@@ -106,6 +113,7 @@ function readLeaderboard(){
   }
 }
 
+// Edits leaderboard with number of new items donated
 function writeLeaderboard(data){
   try {
     const formattedData = data.map(entry => JSON.stringify(entry)).join(',\n ');
@@ -117,6 +125,7 @@ function writeLeaderboard(data){
   }
 }
 
+// Checks if player is already in leaderboard, if so then updates their data
 function updateLeaderboard(steamID, playerName, itemsReceived){
   const leaderboardData = readLeaderboard();
   let playerFound = false;
@@ -133,6 +142,7 @@ function updateLeaderboard(steamID, playerName, itemsReceived){
   writeLeaderboard(leaderboardData);
 }
 
+// Gets players name based on their steam64 to make leaderboard reading easier.
 function getPlayerName(offer) {
   const steamID = offer.partner.getSteamID64();
   community.getSteamUser(offer.partner, (err, user) => {
